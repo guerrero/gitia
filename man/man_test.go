@@ -3,13 +3,16 @@ package man_test
 import (
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 // TestManPageIsCommitted guards against the committed page drifting from the
-// command tree. It regenerates into a scratch copy and compares the parts that
-// do not depend on the build date.
+// command tree. It regenerates the page with SOURCE_DATE_EPOCH pinned to the
+// date the committed page was generated under, so regeneration is
+// deterministic and the comparison is byte for byte.
 func TestManPageIsCommitted(t *testing.T) {
 	committed, err := os.ReadFile("gitia.1")
 	if err != nil {
@@ -18,6 +21,7 @@ func TestManPageIsCommitted(t *testing.T) {
 
 	cmd := exec.Command("go", "run", "./tools/genman")
 	cmd.Dir = ".."
+	cmd.Env = append(os.Environ(), "SOURCE_DATE_EPOCH="+committedEpoch(t, string(committed)))
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("go run ./tools/genman: %v\n%s", err, out)
 	}
@@ -27,23 +31,34 @@ func TestManPageIsCommitted(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if stripDate(string(committed)) != stripDate(string(regenerated)) {
-		// Restore what was committed so a failing test leaves no diff behind.
-		_ = os.WriteFile("gitia.1", committed, 0o644)
+	if string(committed) != string(regenerated) {
 		t.Error("man/gitia.1 is stale; run: make man")
 	}
 }
 
-// stripDate drops the .TH line, which carries the generation date.
-func stripDate(s string) string {
-	var kept []string
-	for _, line := range strings.Split(s, "\n") {
-		if strings.HasPrefix(line, ".TH ") {
-			continue
-		}
-		kept = append(kept, line)
+// committedEpoch returns the SOURCE_DATE_EPOCH value that reproduces the date
+// the committed page was generated under. The .TH line reads
+// .TH GITIA 1 "2006-01-02" ..., and genman renders that date from the epoch it
+// was given, so the epoch regenerates the same page byte for byte.
+func committedEpoch(t *testing.T, page string) string {
+	t.Helper()
+	line, _, ok := strings.Cut(page, "\n")
+	if !ok || !strings.HasPrefix(line, ".TH ") {
+		t.Fatalf("man/gitia.1 does not start with a .TH line")
 	}
-	return strings.Join(kept, "\n")
+	_, rest, ok := strings.Cut(line, `"`)
+	if !ok {
+		t.Fatalf(".TH line carries no date: %q", line)
+	}
+	date, _, ok := strings.Cut(rest, `"`)
+	if !ok || date == "" {
+		t.Fatalf(".TH line carries no date: %q", line)
+	}
+	when, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		t.Fatalf("unparseable .TH date %q: %v", date, err)
+	}
+	return strconv.FormatInt(when.UTC().Unix(), 10)
 }
 
 func TestManPageHasTheSectionsCobraDoesNotEmit(t *testing.T) {

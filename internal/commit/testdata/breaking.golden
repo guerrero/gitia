@@ -1,0 +1,5 @@
+feat(config)!: move config to XDG directory
+
+The config file now resolves through $XDG_CONFIG_HOME.
+
+BREAKING CHANGE: config.toml is no longer read from the repository root

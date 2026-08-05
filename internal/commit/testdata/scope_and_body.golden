@@ -1,0 +1,5 @@
+feat(commit): generate messages from the staged diff
+
+The staged diff is collected with git diff --staged and handed to a local model under Ollama.
+
+Nothing leaves the machine.

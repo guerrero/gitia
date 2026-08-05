@@ -1,0 +1,5 @@
+fix(git): exit 4 when the index is empty
+
+An empty staging area is a user error, not a failure.
+
+Fixes: #123, #456

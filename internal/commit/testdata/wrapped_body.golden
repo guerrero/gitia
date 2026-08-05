@@ -1,0 +1,5 @@
+refactor: extract the precedence engine
+
+The precedence engine used to live inline in the commit command, which meant the precedence matrix
+could only be tested through the whole pipeline including git and Ollama. Moving it into
+internal/rules makes it a pure table test.

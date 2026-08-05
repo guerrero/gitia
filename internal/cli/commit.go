@@ -298,7 +298,7 @@ func generateOnce(ctx context.Context, stderr io.Writer, client *ollama.Client, 
 		msg, err = DecodeMessage(resp.Response)
 		if err != nil {
 			violations = []rules.Violation{{Rule: "json", Message: err.Error()}}
-			user = prompt.Retry(a.user, violations)
+			user = prompt.Retry(user, violations)
 			continue
 		}
 
@@ -307,7 +307,7 @@ func generateOnce(ctx context.Context, stderr io.Writer, client *ollama.Client, 
 		if len(violations) == 0 {
 			return msg, nil
 		}
-		user = prompt.Retry(a.user, violations)
+		user = prompt.Retry(user, violations)
 	}
 
 	var b strings.Builder

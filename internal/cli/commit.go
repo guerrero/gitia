@@ -226,7 +226,7 @@ func runCommit(ctx context.Context, stdout, stderr io.Writer, o commitOptions) e
 
 		// 14. The menu.
 		fmt.Fprintf(stdout, "\n%s\n", rendered)
-		choice, err := ui.Confirm(os.Stdin, stdout)
+		choice, err := ui.Confirm(ctx, os.Stdin, stdout)
 		if err != nil {
 			return err
 		}
@@ -347,7 +347,7 @@ func resolveModel(ctx context.Context, stdout, stderr io.Writer, client *ollama.
 			"model %s is not available locally; run: ollama pull %s", want, want)
 	}
 
-	ok, err := ui.ConfirmYesNo(os.Stdin, stdout, fmt.Sprintf("pull %s?", want))
+	ok, err := ui.ConfirmYesNo(ctx, os.Stdin, stdout, fmt.Sprintf("pull %s?", want))
 	if err != nil {
 		return "", err
 	}

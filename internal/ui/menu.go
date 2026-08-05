@@ -2,12 +2,15 @@ package ui
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/guerrero/gitia/internal/exitcode"
 )
 
 // Choice is one entry from the confirmation menu.
@@ -23,8 +26,10 @@ const (
 const menu = "[y] commit  [e] edit  [r] regenerate  [q] abort: "
 
 // Prompt reads one choice from in, re-prompting on anything unrecognized.
-// Enter alone means commit; EOF means quit.
-func Prompt(in io.Reader, out io.Writer) (Choice, error) {
+// Enter alone means commit; EOF means quit. A canceled context means quit too:
+// a blocked keypress must not survive the interrupt the context was canceled
+// for, and the pipeline treats quit as the 130 abort.
+func Prompt(ctx context.Context, in io.Reader, out io.Writer) (Choice, error) {
 	reader := bufio.NewReader(in)
 
 	for {
@@ -32,7 +37,13 @@ func Prompt(in io.Reader, out io.Writer) (Choice, error) {
 			return ChoiceQuit, err
 		}
 
-		r, _, err := reader.ReadRune()
+		r, err := ctxRead(ctx, func() (rune, error) {
+			r, _, err := reader.ReadRune()
+			return r, err
+		})
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return ChoiceQuit, nil
+		}
 		if errors.Is(err, io.EOF) {
 			fmt.Fprintln(out)
 			return ChoiceQuit, nil
@@ -66,12 +77,12 @@ func Prompt(in io.Reader, out io.Writer) (Choice, error) {
 //
 // Raw mode is not in the Go standard library, so it is set with stty. gitia
 // targets macOS and Linux only, where stty is always present.
-func Confirm(in *os.File, out io.Writer) (Choice, error) {
+func Confirm(ctx context.Context, in *os.File, out io.Writer) (Choice, error) {
 	restore, err := rawMode(in)
 	if err == nil {
 		defer restore()
 	}
-	return Prompt(in, out)
+	return Prompt(ctx, in, out)
 }
 
 // rawMode puts the terminal into cbreak mode and returns a function that
@@ -109,13 +120,20 @@ func stty(in *os.File, args ...string) (string, error) {
 
 // ConfirmYesNo asks a yes/no question that defaults to no. gitia never
 // installs anything implicitly, so the default must always be the inert one.
-func ConfirmYesNo(in io.Reader, out io.Writer, question string) (bool, error) {
+// A canceled context aborts: the error carries exitcode.Aborted so the caller
+// does not need to distinguish a cancel from a "no".
+func ConfirmYesNo(ctx context.Context, in io.Reader, out io.Writer, question string) (bool, error) {
 	if _, err := fmt.Fprintf(out, "%s [y/N] ", question); err != nil {
 		return false, err
 	}
 
-	line, err := bufio.NewReader(in).ReadString('\n')
+	line, err := ctxRead(ctx, func() (string, error) {
+		return bufio.NewReader(in).ReadString('\n')
+	})
 	if err != nil && !errors.Is(err, io.EOF) {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return false, exitcode.Wrap(exitcode.Aborted, err)
+		}
 		return false, err
 	}
 
@@ -124,5 +142,28 @@ func ConfirmYesNo(in io.Reader, out io.Writer, question string) (bool, error) {
 		return true, nil
 	default:
 		return false, nil
+	}
+}
+
+// ctxRead runs the blocking read f and returns its result, or ctx.Err() when
+// the context is canceled first. A blocked read cannot be interrupted, so the
+// goroutine running it stays alive until the read returns — on a terminal that
+// means process exit, and the result is discarded.
+func ctxRead[T any](ctx context.Context, f func() (T, error)) (T, error) {
+	type result struct {
+		v   T
+		err error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		v, err := f()
+		ch <- result{v, err}
+	}()
+	select {
+	case <-ctx.Done():
+		var zero T
+		return zero, ctx.Err()
+	case r := <-ch:
+		return r.v, r.err
 	}
 }

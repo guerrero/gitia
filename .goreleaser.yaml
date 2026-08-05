@@ -1,0 +1,65 @@
+version: 2
+
+project_name: gitia
+
+before:
+  hooks:
+    - go mod tidy
+    - make man
+
+builds:
+  - id: gitia
+    main: ./cmd/gitia
+    binary: gitia
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin, linux]
+    goarch: [amd64, arm64]
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/guerrero/gitia/internal/cli.Version={{ .Version }}
+      - -X github.com/guerrero/gitia/internal/cli.Commit={{ .ShortCommit }}
+      - -X github.com/guerrero/gitia/internal/cli.Date={{ .Date }}
+
+archives:
+  - id: gitia
+    formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+      - man/gitia.1
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+
+brews:
+  - name: gitia
+    repository:
+      owner: guerrero
+      name: homebrew-tap
+    homepage: https://github.com/guerrero/gitia
+    description: Generate Conventional Commits from the staged diff with a local model
+    license: Unlicense
+    dependencies:
+      - name: git
+      - name: ollama
+        type: optional
+    install: |
+      bin.install "gitia"
+      man1.install "man/gitia.1"
+    test: |
+      system "#{bin}/gitia", "--version"

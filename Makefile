@@ -29,7 +29,7 @@ install:
 	go install -trimpath -ldflags '$(LDFLAGS)' ./cmd/gitia
 
 release-dry:
-	@echo "implemented in Task 17"
+	goreleaser release --snapshot --clean --skip=publish
 
 clean:
 	rm -f $(BINARY) coverage.out

@@ -1,0 +1,25 @@
+# usage errors are part of the exit-code contract: 2, not 1
+
+# an unknown flag is a usage error
+exec sh -c 'gitia commit --bogus-flag; echo "exit=$?"'
+stderr 'unknown flag: --bogus-flag'
+stdout 'exit=2'
+
+# an unknown subcommand is a usage error
+exec sh -c 'gitia bogus; echo "exit=$?"'
+stderr 'unknown command "bogus"'
+stdout 'exit=2'
+
+# a stray positional argument is a usage error
+exec sh -c 'gitia commit extra-arg; echo "exit=$?"'
+stderr 'unknown command "extra-arg" for "gitia commit"'
+stdout 'exit=2'
+
+# a flag missing its argument is a usage error
+exec sh -c 'gitia commit --model; echo "exit=$?"'
+stderr 'flag needs an argument: --model'
+stdout 'exit=2'
+
+# valid invocations are unaffected
+exec gitia --version
+stdout 'gitia '

@@ -2,9 +2,11 @@ package cli_test
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/rogpeppe/go-internal/testscript"
+	"github.com/spf13/cobra"
 
 	"github.com/guerrero/gitia/internal/cli"
 	"github.com/guerrero/gitia/internal/exitcode"
@@ -17,8 +19,16 @@ func TestMain(m *testing.M) {
 		"gitia": func() int {
 			root := cli.NewRootCmd()
 			root.SetArgs(cli.PreparseFixes(os.Args[1:]))
+			// Mirrors cmd/gitia/main.go, which the harness cannot import:
+			// flag errors and cobra's unknown-command errors are usage errors.
+			root.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+				return exitcode.Wrap(exitcode.Usage, err)
+			})
 			if err := root.Execute(); err != nil {
 				os.Stderr.WriteString("gitia: " + err.Error() + "\n")
+				if strings.HasPrefix(err.Error(), "unknown command ") {
+					err = exitcode.Wrap(exitcode.Usage, err)
+				}
 				return exitcode.Of(err)
 			}
 			return 0

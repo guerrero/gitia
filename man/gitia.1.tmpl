@@ -1,0 +1,98 @@
+.TH GITIA 1 "{{.Date}}" "gitia {{.Version}}" "User Commands"
+.SH NAME
+gitia \- generate Conventional Commits from the staged diff with a local model
+.SH SYNOPSIS
+.B gitia
+.RI [ command ]
+.RI [ flags ]
+.SH DESCRIPTION
+.B gitia
+generates a Conventional Commits message from the staged diff using a model
+running locally under Ollama. Nothing leaves the machine.
+.PP
+It respects the conventions a repository already declares \(em
+.IR AGENTS.md ,
+.IR CLAUDE.md ,
+.I GEMINI.md
+and commitlint \(em rather than imposing its own. When a commitlint
+configuration is present, gitia conforms to it: commitlint is a hard validity
+gate applied across every other layer of preference, and gitia prints a warning
+naming the rule that overrode a preference.
+.PP
+.B gitia
+reads only the staging area. It never stages files on your behalf, so it cannot
+commit work you were not ready to ship.
+{{.Commands}}
+.SH ENVIRONMENT
+.TP
+.B GITIA_CONFIG_DIR
+Overrides the configuration directory. Takes precedence over
+.BR XDG_CONFIG_HOME .
+.TP
+.B XDG_CONFIG_HOME
+When set, the configuration directory is
+.IR $XDG_CONFIG_HOME/gitia .
+Used on macOS as well as Linux.
+.TP
+.B OLLAMA_HOST
+Base URL of the Ollama server. Takes precedence over
+.I ollama.host
+in the configuration file.
+.TP
+.B EDITOR ", " VISUAL
+The editor opened by the
+.B [e]
+choice at the confirmation prompt.
+.BR EDITOR " is tried first, then " VISUAL ", then " vi .
+.SH FILES
+.TP
+.I ~/.config/gitia/config.toml
+User configuration. A missing file is not an error; every value has a default.
+.TP
+.I ~/.config/gitia/commitlint/
+Cached
+.B commitlint --print-config json
+output, keyed on the configuration and lockfile modification times.
+.TP
+.IR ./AGENTS.md ", " ./CLAUDE.md ", " ./GEMINI.md
+Repository conventions. Sections whose headings mention
+.IR commit ", " git ", " changelog ", " message ", or " versioning
+are included in the prompt.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Generic error.
+.TP
+.B 2
+Usage error.
+.TP
+.B 3
+Not a git repository.
+.TP
+.B 4
+Nothing staged.
+.TP
+.B 5
+Ollama unreachable.
+.TP
+.B 6
+Model missing and cannot be pulled non-interactively.
+.TP
+.B 7
+Generation failed after retry.
+.TP
+.B 8
+commitlint rejected the message.
+.TP
+.B 130
+Aborted by the user.
+.SH SEE ALSO
+.BR git-commit (1),
+.BR ollama (1)
+.PP
+Conventional Commits v1.0.0: https://www.conventionalcommits.org/en/v1.0.0/
+.PP
+AGENTS.md: https://agents.md/

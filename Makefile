@@ -23,7 +23,7 @@ lint:
 	golangci-lint run
 
 man:
-	@echo "implemented in Task 16"
+	go run ./tools/genman
 
 install:
 	go install -trimpath -ldflags '$(LDFLAGS)' ./cmd/gitia

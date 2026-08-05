@@ -36,5 +36,7 @@ func NewRootCmd() *cobra.Command {
 	root.AddCommand(newCommitCmd())
 	root.AddCommand(newDoctorCmd())
 
+	enableCompletion(root)
+
 	return root
 }

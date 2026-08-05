@@ -171,6 +171,38 @@ func TestStagedNameStatusHandlesPathsWithSpaces(t *testing.T) {
 	}
 }
 
+func TestStagedFileDiffsDetectsRename(t *testing.T) {
+	ctx := context.Background()
+	dir := newRepo(t)
+	write(t, dir, "old.txt", "content that stays identical so git detects a rename\n")
+	run(t, dir, "add", ".")
+	run(t, dir, "commit", "-m", "chore: seed")
+	run(t, dir, "mv", "old.txt", "renamed.txt")
+
+	diffs, err := git.StagedFileDiffs(ctx, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	byPath := map[string]string{}
+	for _, d := range diffs {
+		byPath[d.Path] = d.Patch
+	}
+	patch := byPath["renamed.txt"]
+	if patch == "" {
+		t.Fatalf("StagedFileDiffs() = %+v, want a patch for renamed.txt", diffs)
+	}
+	if !strings.Contains(patch, "rename from old.txt") {
+		t.Errorf("renamed.txt patch = %q, want it to contain %q", patch, "rename from old.txt")
+	}
+	if !strings.Contains(patch, "rename to renamed.txt") {
+		t.Errorf("renamed.txt patch = %q, want it to contain %q", patch, "rename to renamed.txt")
+	}
+	if strings.Contains(patch, "+content that stays identical") {
+		t.Error("renamed.txt patch leaked the full body as add lines; rename not detected")
+	}
+}
+
 func TestStagedStat(t *testing.T) {
 	ctx := context.Background()
 	dir := newRepo(t)

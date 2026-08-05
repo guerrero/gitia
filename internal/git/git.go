@@ -119,7 +119,12 @@ func StagedFileDiffs(ctx context.Context, dir string) ([]FileDiff, error) {
 
 	diffs := make([]FileDiff, 0, len(changes))
 	for _, c := range changes {
-		patch, err := run(ctx, dir, "diff", "--staged", "-M", "--", c.Path)
+		paths := []string{c.Path}
+		if c.OldPath != "" {
+			paths = append(paths, c.OldPath) // let -M see the deleted side too
+		}
+		args := append([]string{"diff", "--staged", "-M", "--"}, paths...)
+		patch, err := run(ctx, dir, args...)
 		if err != nil {
 			return nil, err
 		}

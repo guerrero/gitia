@@ -3,8 +3,10 @@ package rules_test
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/guerrero/gitia/internal/exitcode"
 	"github.com/guerrero/gitia/internal/rules"
 )
 
@@ -298,5 +300,35 @@ func TestCachedPrintConfigMissesWhenTheConfigChanges(t *testing.T) {
 
 	if _, err := rules.CachedPrintConfig(t.Context(), root, broken, cache); err == nil {
 		t.Fatal("CachedPrintConfig() = nil error; a stale key must miss and then fail on the broken runner")
+	}
+}
+
+// shRejects is a stand-in commitlint runner that always rejects, the way a
+// real commitlint does on a non-conforming message.
+var shRejects = rules.Runner{Name: "sh", Argv: []string{"sh", "-c", "echo 'subject may not be empty' >&2; exit 1"}}
+
+func TestCommitlintEditRejectsWithExitCode8(t *testing.T) {
+	err := rules.CommitlintEdit(t.Context(), t.TempDir(), shRejects, "feat: subject.\n")
+	if err == nil {
+		t.Fatal("CommitlintEdit() = nil error; a rejecting runner must fail the commit")
+	}
+	if got := exitcode.Of(err); got != exitcode.CommitlintRejected {
+		t.Errorf("exitcode.Of(err) = %d, want %d", got, exitcode.CommitlintRejected)
+	}
+	if !strings.Contains(err.Error(), "subject may not be empty") {
+		t.Errorf("CommitlintEdit() = %v, want the runner's stderr in the message", err)
+	}
+}
+
+func TestCommitlintEditAcceptsWhenTheRunnerPasses(t *testing.T) {
+	runner := rules.Runner{Name: "sh", Argv: []string{"sh", "-c", "exit 0"}}
+	if err := rules.CommitlintEdit(t.Context(), t.TempDir(), runner, "feat: subject\n"); err != nil {
+		t.Errorf("CommitlintEdit() = %v, want nil", err)
+	}
+}
+
+func TestCommitlintEditSkipsAZeroRunner(t *testing.T) {
+	if err := rules.CommitlintEdit(t.Context(), t.TempDir(), rules.NoRunner, "feat: subject\n"); err != nil {
+		t.Errorf("CommitlintEdit() = %v, want nil for NoRunner", err)
 	}
 }

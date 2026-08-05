@@ -32,7 +32,7 @@ func newVersionCmd() *cobra.Command {
 		Short: "Print version information",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cmd.Print(VersionString())
+			fmt.Fprint(cmd.OutOrStdout(), VersionString())
 			return nil
 		},
 	}

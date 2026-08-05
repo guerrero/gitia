@@ -2,6 +2,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +21,7 @@ func NewRootCmd() *cobra.Command {
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if showVersion {
-				cmd.Print(VersionString())
+				fmt.Fprint(cmd.OutOrStdout(), VersionString())
 				return nil
 			}
 			return cmd.Help()

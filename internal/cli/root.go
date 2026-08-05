@@ -31,6 +31,7 @@ func NewRootCmd() *cobra.Command {
 	root.Flags().BoolVarP(&showVersion, "version", "v", false, "print version information")
 
 	root.AddCommand(newVersionCmd())
+	root.AddCommand(newCommitCmd())
 
 	return root
 }

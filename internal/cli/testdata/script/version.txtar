@@ -1,0 +1,9 @@
+# --version prints the build metadata and exits 0
+exec gitia --version
+stdout 'gitia '
+stdout 'platform: '
+! stderr .
+
+# the version subcommand agrees with the flag
+exec gitia version
+stdout 'gitia '

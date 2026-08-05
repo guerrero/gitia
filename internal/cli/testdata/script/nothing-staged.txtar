@@ -1,0 +1,6 @@
+# an initialized repository with an empty index exits 4
+exec git init -q
+exec sh -c 'gitia commit 2>&1; echo "exit=$?"'
+stdout 'no staged changes'
+stdout 'git add'
+stdout 'exit=4'

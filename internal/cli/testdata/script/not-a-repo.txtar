@@ -1,0 +1,4 @@
+# outside a git repository, commit exits 3
+exec sh -c 'gitia commit 2>&1; echo "exit=$?"'
+stdout 'not a git repository'
+stdout 'exit=3'

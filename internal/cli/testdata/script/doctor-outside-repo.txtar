@@ -1,0 +1,5 @@
+# outside a repository the repository check fails
+exec sh -c 'gitia doctor; echo "exit=$?"'
+stdout 'FAIL'
+stdout 'repository'
+stdout 'exit=1'

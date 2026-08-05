@@ -1,0 +1,20 @@
+# help lists all three subcommands
+exec gitia --help
+stdout 'commit'
+stdout 'doctor'
+stdout 'version'
+
+# commit --help shows the documented flag surface
+exec gitia commit --help
+stdout '-y, --yes'
+stdout '-m, --model'
+stdout '-b, --breaking'
+stdout '-f, --fixes'
+stdout '-n, --dry-run'
+stdout '--type'
+stdout '--scope'
+stdout '--no-body'
+stdout '--verbose'
+
+# --verbose deliberately has no short form: -v is version
+! stdout '-v, --verbose'

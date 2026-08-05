@@ -1,0 +1,16 @@
+# doctor --json emits parseable JSON and exits 1 when a check fails
+exec git init -q
+exec sh -c 'gitia doctor --json; echo "exit=$?"'
+stdout '"checks"'
+stdout '"name": "git"'
+stdout '"name": "conventions"'
+stdout '"status"'
+stdout 'exit=1'
+
+# the human form names every check
+exec sh -c 'gitia doctor; echo "exit=$?"'
+stdout 'repository'
+stdout 'ollama server'
+stdout 'commitlint'
+stdout 'editor'
+stdout 'exit=1'

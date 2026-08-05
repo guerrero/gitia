@@ -14,8 +14,8 @@ import (
 type AgentDoc struct {
 	// Path is repository-relative and always uses forward slashes.
 	Path string
-	// Content is the extracted sections, or the whole file when it is small
-	// and has no matching heading.
+	// Content is the extracted sections, or the whole file only when the file
+	// has no recognized headings outside fenced code blocks.
 	Content string
 }
 
@@ -124,10 +124,14 @@ func stagedDirs(stagedPaths []string) []string {
 }
 
 // ExtractSections returns the Markdown sections whose heading text mentions a
-// commit-related keyword. Nested subsections come along with their parent. If
-// nothing matches and the file is at most maxBytes, the whole file is returned
-// so that repositories writing their conventions in prose are not silently
-// ignored; a larger unmatched file yields the empty string.
+// commit-related keyword. Nested subsections come along with their parent.
+// Headings inside fenced code blocks are never treated as section headings.
+//
+// When no section matches, structured Markdown that has recognized headings
+// yields the empty string. The whole file is returned only for unstructured
+// prose with no recognized headings at all, and only when it is at most
+// maxBytes; a larger file yields the empty string. Headings that appear only
+// inside fenced code blocks do not count as recognized headings.
 //
 // There is deliberately no gitia-specific marker syntax: AGENTS.md stays
 // vendor-neutral.

@@ -25,7 +25,7 @@ func main() {
 
 	// Cobra returns flag-parsing errors to the command's FlagErrorFunc; claim
 	// them as usage errors (exit 2) before they reach exitcode.Of.
-	root.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return exitcode.Wrap(exitcode.Usage, err)
 	})
 

@@ -23,6 +23,7 @@ type Config struct {
 	Diff       DiffConfig       `toml:"diff"`
 }
 
+// ModelConfig is the [model] section of config.toml.
 type ModelConfig struct {
 	Name        string   `toml:"name"`
 	Fallback    []string `toml:"fallback"`
@@ -31,11 +32,13 @@ type ModelConfig struct {
 	KeepAlive   string   `toml:"keep_alive"`
 }
 
+// OllamaConfig is the [ollama] section of config.toml.
 type OllamaConfig struct {
 	Host    string `toml:"host"`
 	Timeout string `toml:"timeout"`
 }
 
+// CommitConfig is the [commit] section of config.toml.
 type CommitConfig struct {
 	Types             []string `toml:"types"`
 	HeaderMaxLength   int      `toml:"header_max_length"`
@@ -46,17 +49,20 @@ type CommitConfig struct {
 	Editor            string   `toml:"editor"`
 }
 
+// CommitlintConfig is the [commitlint] section of config.toml.
 type CommitlintConfig struct {
 	Enabled bool   `toml:"enabled"`
 	Runner  string `toml:"runner"`
 }
 
+// AgentsConfig is the [agents] section of config.toml.
 type AgentsConfig struct {
 	Enabled  bool     `toml:"enabled"`
 	Files    []string `toml:"files"`
 	MaxBytes int      `toml:"max_bytes"`
 }
 
+// DiffConfig is the [diff] section of config.toml.
 type DiffConfig struct {
 	MaxBytes int      `toml:"max_bytes"`
 	Exclude  []string `toml:"exclude"`

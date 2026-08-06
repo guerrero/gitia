@@ -23,8 +23,10 @@ func TestResolveBaselineOnly(t *testing.T) {
 }
 
 func TestResolvePrecedenceMatrix(t *testing.T) {
-	conventional := []string{"feat", "fix", "docs", "style", "refactor", "perf",
-		"test", "build", "ci", "chore", "revert"}
+	conventional := []string{
+		"feat", "fix", "docs", "style", "refactor", "perf",
+		"test", "build", "ci", "chore", "revert",
+	}
 
 	restrictive := rules.Constraints{}
 	types := []string{"feat", "fix", "chore"}

@@ -34,8 +34,10 @@ func TestConventionalBaseline(t *testing.T) {
 		t.Errorf("Language = %q, want \"en\"", rs.Language)
 	}
 
-	want := []string{"feat", "fix", "docs", "style", "refactor", "perf",
-		"test", "build", "ci", "chore", "revert"}
+	want := []string{
+		"feat", "fix", "docs", "style", "refactor", "perf",
+		"test", "build", "ci", "chore", "revert",
+	}
 	if len(rs.Types) != len(want) {
 		t.Fatalf("Types = %v, want %v", rs.Types, want)
 	}

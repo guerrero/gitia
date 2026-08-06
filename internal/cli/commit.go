@@ -39,7 +39,7 @@ func newCommitCmd() *cobra.Command {
 		Use:   "commit",
 		Short: "Generate a commit message from the staged diff and commit it",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runCommit(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), o)
 		},
 	}

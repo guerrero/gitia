@@ -19,7 +19,7 @@ func NewRootCmd() *cobra.Command {
 			"model running locally under Ollama. Nothing leaves your machine.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if showVersion {
 				fmt.Fprint(cmd.OutOrStdout(), VersionString())
 				return nil

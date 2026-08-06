@@ -18,7 +18,7 @@ func TestSpinnerWritesNothingToANonTerminal(t *testing.T) {
 	}
 }
 
-func TestSpinnerStopIsIdempotent(t *testing.T) {
+func TestSpinnerStopIsIdempotent(_ *testing.T) {
 	var out bytes.Buffer
 	s := ui.StartSpinner(&out, "Processing...")
 	s.Stop()

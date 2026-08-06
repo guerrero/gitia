@@ -16,6 +16,7 @@ import (
 // Choice is one entry from the confirmation menu.
 type Choice rune
 
+// Choices accepted by the confirmation prompt.
 const (
 	ChoiceCommit     Choice = 'y'
 	ChoiceEdit       Choice = 'e'

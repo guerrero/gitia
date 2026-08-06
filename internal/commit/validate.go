@@ -35,8 +35,8 @@ func Validate(m Message, rs rules.RuleSet) []rules.Violation {
 	}
 
 	subject := strings.TrimSpace(m.Subject)
-	switch {
-	case subject == "":
+	switch subject {
+	case "":
 		add("subject-empty", "subject may not be empty")
 	default:
 		if rs.SubjectCase == rules.CaseLower && subject != strings.ToLower(subject) {

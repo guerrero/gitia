@@ -43,7 +43,7 @@ func TestSystemOrdersAgentDocsLeastAuthoritativeFirst(t *testing.T) {
 	if iClaude < 0 || iRoot < 0 || iNested < 0 {
 		t.Fatalf("System() dropped a document\n%s", got)
 	}
-	if !(iClaude < iRoot && iRoot < iNested) {
+	if iClaude >= iRoot || iRoot >= iNested {
 		t.Errorf("System() ordered documents wrongly: claude=%d root=%d nested=%d", iClaude, iRoot, iNested)
 	}
 }

@@ -15,13 +15,13 @@ import (
 // TestMain registers gitia as a testscript command so the .txtar files can
 // invoke the real command tree in-process, with real exit codes.
 func TestMain(m *testing.M) {
-	os.Exit(testscript.RunMain(m, map[string]func() int{
-		"gitia": func() int {
+	testscript.Main(m, map[string]func(){
+		"gitia": func() {
 			root := cli.NewRootCmd()
 			root.SetArgs(cli.PreparseFixes(os.Args[1:]))
 			// Mirrors cmd/gitia/main.go, which the harness cannot import:
 			// flag errors and cobra's unknown-command errors are usage errors.
-			root.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
+			root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 				return exitcode.Wrap(exitcode.Usage, err)
 			})
 			if err := root.Execute(); err != nil {
@@ -31,11 +31,10 @@ func TestMain(m *testing.M) {
 				if strings.HasPrefix(err.Error(), "unknown command ") {
 					err = exitcode.Wrap(exitcode.Usage, err)
 				}
-				return exitcode.Of(err)
+				os.Exit(exitcode.Of(err))
 			}
-			return 0
 		},
-	}))
+	})
 }
 
 func TestScript(t *testing.T) {

@@ -6,6 +6,20 @@ linters:
     - staticcheck
     - errcheck
     - revive
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (*os.File).WriteString
+        - (*io.PipeWriter).Close
+        - os.Remove
+        - os.RemoveAll
+        - os.Stderr.WriteString
+        - os.Stdout.WriteString
 
 formatters:
   enable:

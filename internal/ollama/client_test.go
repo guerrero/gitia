@@ -53,7 +53,7 @@ func TestTagsUnreachableMapsToExitCode5(t *testing.T) {
 }
 
 func TestHas(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprint(w, `{"models":[{"name":"gemma4:e2b-it-qat","size":1,"digest":"a"}]}`)
 	}))
 	defer srv.Close()
@@ -75,7 +75,7 @@ func TestHas(t *testing.T) {
 }
 
 func TestHasTreatsABareNameAsTheLatestTag(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprint(w, `{"models":[{"name":"qwen3:latest","size":1,"digest":"a"}]}`)
 	}))
 	defer srv.Close()
@@ -153,7 +153,7 @@ func TestGenerateSendsTheSchemaAndDisablesStreaming(t *testing.T) {
 }
 
 func TestGenerateServerErrorMapsToExitCode7(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, `{"error":"model requires more system memory"}`)
 	}))
@@ -201,7 +201,7 @@ func TestPullStreamsProgress(t *testing.T) {
 }
 
 func TestPullSurfacesAStreamedError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprint(w, `{"status":"pulling manifest"}`+"\n")
 		fmt.Fprint(w, `{"error":"model not found"}`+"\n")
 	}))

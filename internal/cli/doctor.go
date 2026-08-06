@@ -21,6 +21,7 @@ import (
 // CheckStatus is the outcome of one doctor check.
 type CheckStatus string
 
+// Status values reported by doctor checks.
 const (
 	StatusPass CheckStatus = "pass"
 	StatusWarn CheckStatus = "warn"
@@ -48,7 +49,7 @@ func newDoctorCmd() *cobra.Command {
 		Use:   "doctor",
 		Short: "Diagnose gitia's environment",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			wd, err := os.Getwd()
 			if err != nil {
 				return err

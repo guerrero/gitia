@@ -34,3 +34,12 @@ not what — the diff already says what. Omit the body for mechanical changes.
 Standard Go with gofumpt. Package comments on every package. Comments explain
 why a decision was made, not what the line does. `internal/rules` is the only
 package that knows about precedence; keep it that way.
+
+## Release
+
+Releases are manual; the checklist lives in CONTRIBUTING.md. Version numbers
+follow Semantic Versioning (pre-1.0: `feat` → minor, `fix` → patch). The
+changelog is curated by hand in Keep a Changelog format: every release moves
+the `[Unreleased]` section to a dated version heading. Tag `vX.Y.Z` on `main`,
+then `GITHUB_TOKEN=$(gh auth token) make release` publishes assets and updates
+the Homebrew tap formula.

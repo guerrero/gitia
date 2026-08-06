@@ -48,3 +48,27 @@ with `exitcode.Wrap`, and `cmd/gitia/main.go` maps them via `errors.As`.
 ## Commit messages
 
 See `AGENTS.md`. Use gitia itself.
+
+## Releasing
+
+Releases are manual and documented here; there is no CI. A release publishes
+binary assets to a GitHub Release and updates the Homebrew formula in
+`guerrero/homebrew-tap` automatically via goreleaser.
+
+Versioning follows Semantic Versioning. Until 1.0: `feat` bumps the minor
+version, `fix` bumps the patch version, breaking changes bump the minor
+version.
+
+Checklist:
+
+1. `make test lint man` — the suite is green and `man/gitia.1` is current.
+2. Move the `[Unreleased]` section in `CHANGELOG.md` to `[x.y.z] - YYYY-MM-DD`
+   and update the compare links at the bottom.
+3. Commit (use gitia itself) and push: `git push origin main`.
+4. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+5. `GITHUB_TOKEN=$(gh auth token) make release` — goreleaser builds the
+   darwin/linux archives, creates the GitHub Release with notes from the
+   commits since the last tag, and pushes `Formula/gitia.rb` to
+   `guerrero/homebrew-tap`. The token needs `repo` scope (write access to
+   both repositories).
+6. Verify: `brew update && brew upgrade gitia` installs the new version.

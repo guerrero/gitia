@@ -11,7 +11,7 @@ LDFLAGS := -s -w \
 
 export CGO_ENABLED := 0
 
-.PHONY: build test lint man install release-dry clean
+.PHONY: build test lint man install release release-dry clean
 
 build:
 	go build -trimpath -ldflags '$(LDFLAGS)' -o $(BINARY) ./cmd/gitia
@@ -30,6 +30,15 @@ install:
 
 release-dry:
 	goreleaser release --snapshot --clean --skip=publish
+
+release:
+	@tag=$$(git tag --points-at HEAD); \
+	if [ -z "$$tag" ]; then \
+		echo "error: HEAD has no tag; tag a release first (see CONTRIBUTING.md)" >&2; \
+		exit 1; \
+	fi; \
+	echo "releasing $$tag"; \
+	goreleaser release --clean
 
 clean:
 	rm -f $(BINARY) coverage.out

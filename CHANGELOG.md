@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-08-05
+## [0.2.0] - 2026-08-06
 
 ### Added
 
@@ -24,6 +24,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `gitia doctor` with ten checks and a `--json` mode.
 - A confirmation menu with commit, edit, regenerate, and abort.
 - `man gitia` and bash, zsh, and fish completions.
+- `make release`: a guarded release target that publishes assets and updates
+  the Homebrew tap formula. The checklist lives in CONTRIBUTING.md.
 
-[Unreleased]: https://github.com/guerrero/gitia/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/guerrero/gitia/releases/tag/v0.1.0
+### Changed
+
+- Polished `gitia doctor` output, the editor flow, prompt handling, and commit
+  feedback.
+
+### Fixed
+
+- Usage errors exit with status 2.
+- Prompts abort when the command context is canceled.
+- Reroll keeps its context when a validation retry is needed.
+
+### Removed
+
+- GitHub Actions workflows; releases are manual now.
+
+[Unreleased]: https://github.com/guerrero/gitia/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/guerrero/gitia/releases/tag/v0.2.0

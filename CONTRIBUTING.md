@@ -68,7 +68,9 @@ Checklist:
 4. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 5. `GITHUB_TOKEN=$(gh auth token) make release` — goreleaser builds the
    darwin/linux archives, creates the GitHub Release with notes from the
-   commits since the last tag, and pushes `Formula/gitia.rb` to
-   `guerrero/homebrew-tap`. The token needs `repo` scope (write access to
-   both repositories).
+   commits since the last tag, and pushes `gitia.rb` (at the tap root) to
+   `guerrero/homebrew-tap`. `make release` then strips the redundant
+   `version` line goreleaser emits, since brew derives the version from the
+   URL — this keeps `brew audit` green. The token needs `repo` scope (write
+   access to both repositories).
 6. Verify: `brew update && brew upgrade gitia` installs the new version.

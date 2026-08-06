@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Strip the redundant `version "..."` line from the tap formula after a
+# release. goreleaser emits it unconditionally, but brew derives the version
+# from the URL, so `brew audit` fails on it. Run from `make release` right
+# after goreleaser; requires GITHUB_TOKEN with write access to the tap.
+set -euo pipefail
+
+tap_url="https://github.com/guerrero/homebrew-tap.git"
+push_url="https://x-access-token:${GITHUB_TOKEN:-}@github.com/guerrero/homebrew-tap.git"
+
+tmp_dir=$(mktemp -d)
+trap 'rm -rf "$tmp_dir"' EXIT
+
+git clone --quiet "$tap_url" "$tmp_dir/tap"
+cd "$tmp_dir/tap"
+
+if ! grep -q '^  version "' gitia.rb; then
+	echo "formula already clean"
+	exit 0
+fi
+
+if [ -z "${GITHUB_TOKEN:-}" ]; then
+	echo "error: GITHUB_TOKEN is not set; cannot push the cleanup commit" >&2
+	exit 1
+fi
+
+perl -ni -e 'print unless /^  version "/' gitia.rb
+
+git add gitia.rb
+
+git -c user.name="goreleaserbot" -c user.email="bot@goreleaser.com" \
+	-c commit.gpgsign=false commit --quiet \
+	-m "chore: drop redundant version line from gitia formula"
+
+git push --quiet "$push_url" HEAD:main
+echo "stripped version line from gitia.rb ($(git rev-parse --short HEAD))"

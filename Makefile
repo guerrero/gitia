@@ -38,7 +38,8 @@ release:
 		exit 1; \
 	fi; \
 	echo "releasing $$tag"; \
-	goreleaser release --clean
+	goreleaser release --clean && \
+	./scripts/clean-tap-formula
 
 clean:
 	rm -f $(BINARY) coverage.out

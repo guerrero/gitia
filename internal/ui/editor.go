@@ -9,15 +9,20 @@ import (
 	"github.com/guerrero/gitia/internal/exitcode"
 )
 
-// Editor resolves the editor command: $EDITOR, then $VISUAL, then vi. The
-// value is split into command and arguments, honoring single- and double-quote
-// grouping so both "code --wait" and "sh -c '...' --" work.
-func Editor() []string {
-	for _, env := range []string{"EDITOR", "VISUAL"} {
-		if v := strings.TrimSpace(os.Getenv(env)); v != "" {
-			if fields := splitCommand(v); len(fields) > 0 {
-				return fields
-			}
+// Editor resolves the editor command: the configured value from config.toml,
+// then $EDITOR, then vi as a last resort. A non-empty configured takes
+// precedence over the environment; an empty configured means "not set". The
+// value is split into command and arguments, honoring single- and
+// double-quote grouping so both "code --wait" and "sh -c '...' --" work.
+func Editor(configured string) []string {
+	if c := strings.TrimSpace(configured); c != "" {
+		if fields := splitCommand(c); len(fields) > 0 {
+			return fields
+		}
+	}
+	if v := strings.TrimSpace(os.Getenv("EDITOR")); v != "" {
+		if fields := splitCommand(v); len(fields) > 0 {
+			return fields
 		}
 	}
 	return []string{"vi"}
@@ -79,8 +84,9 @@ func splitCommand(s string) []string {
 
 // EditMessage writes message to a temp file, opens the editor on it, and
 // returns the saved result with comment lines stripped. An empty buffer aborts,
-// matching git's own behavior.
-func EditMessage(ctx context.Context, message string) (string, error) {
+// matching git's own behavior. configured is the editor set in config.toml,
+// empty when the user did not set one.
+func EditMessage(ctx context.Context, message, configured string) (string, error) {
 	f, err := os.CreateTemp("", "gitia-*.gitcommit")
 	if err != nil {
 		return "", err
@@ -96,7 +102,7 @@ func EditMessage(ctx context.Context, message string) (string, error) {
 		return "", err
 	}
 
-	argv := append(Editor(), path)
+	argv := append(Editor(configured), path)
 	cmd := exec.CommandContext(ctx, argv[0], argv[1:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

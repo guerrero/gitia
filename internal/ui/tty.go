@@ -2,7 +2,10 @@
 // menu, and the $EDITOR handoff.
 package ui
 
-import "os"
+import (
+	"io"
+	"os"
+)
 
 // IsTTY reports whether f is a character device, i.e. an interactive terminal.
 // When stdout is not a TTY, gitia behaves as if --yes were passed.
@@ -15,4 +18,14 @@ func IsTTY(f *os.File) bool {
 		return false
 	}
 	return info.Mode()&os.ModeCharDevice != 0
+}
+
+// IsTerminalWriter reports whether w is a real terminal. Animated and colored
+// output is gated on it so piped and captured output stays clean.
+func IsTerminalWriter(w io.Writer) bool {
+	f, ok := w.(*os.File)
+	if !ok {
+		return false
+	}
+	return IsTTY(f)
 }

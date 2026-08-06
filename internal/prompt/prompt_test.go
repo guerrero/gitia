@@ -79,6 +79,23 @@ func TestSystemSaysNoBodyWhenDisabled(t *testing.T) {
 	}
 }
 
+func TestSystemAsksForIntentNotMechanics(t *testing.T) {
+	got := strings.ToLower(prompt.System(rules.Conventional(), nil))
+
+	if !strings.Contains(got, "intent") {
+		t.Errorf("System() must ask for the change's intent\n%s", got)
+	}
+	if !strings.Contains(got, "disable telemetry") || !strings.Contains(got, "update settings") {
+		t.Errorf("System() must contrast intent with the mechanical description\n%s", got)
+	}
+	if !strings.Contains(got, "hunks") {
+		t.Errorf("System() must tell the model to read the diff hunks\n%s", got)
+	}
+	if !strings.Contains(got, "semantic change") {
+		t.Errorf("System() must ask the body to describe the semantic change\n%s", got)
+	}
+}
+
 func TestUserIncludesTheStatAndEveryPath(t *testing.T) {
 	b := prompt.Budgeted{
 		Stat: " a.go | 2 +-\n b.go | 1 +\n",

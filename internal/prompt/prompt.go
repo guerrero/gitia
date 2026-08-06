@@ -35,6 +35,9 @@ func System(rs rules.RuleSet, docs []rules.AgentDoc) string {
 		fmt.Fprintf(&b, "- The whole \"type(scope): subject\" line must be at most %d characters.\n", rs.HeaderMaxLength)
 	}
 	b.WriteString("- Write the subject in the imperative mood: \"add\", not \"added\" or \"adds\".\n")
+	b.WriteString("- The subject names the intent of the change — what it accomplishes for a user of the code — not the mechanics of the diff. Prefer \"disable telemetry\" over \"update settings\".")
+	b.WriteString("\n")
+	b.WriteString("- Infer that intent from the diff hunks, not from the file list: the stat and the paths say what was touched, not what changed.\n")
 	if rs.SubjectFullStop {
 		b.WriteString("- Do not end the subject with a period.\n")
 	}
@@ -43,6 +46,7 @@ func System(rs rules.RuleSet, docs []rules.AgentDoc) string {
 	}
 	if rs.IncludeBody {
 		b.WriteString("- Write a short body explaining why the change was made, not what the diff already shows.\n")
+		b.WriteString("- When the subject alone does not tell the whole story, the body describes the semantic change: what the code now does that it did not before.\n")
 		b.WriteString("- Each body entry is one paragraph. Do not wrap lines yourself.\n")
 		b.WriteString("- Omit the body entirely when the subject says everything.\n")
 	} else {

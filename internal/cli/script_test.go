@@ -25,7 +25,9 @@ func TestMain(m *testing.M) {
 				return exitcode.Wrap(exitcode.Usage, err)
 			})
 			if err := root.Execute(); err != nil {
-				os.Stderr.WriteString("gitia: " + err.Error() + "\n")
+				if msg := err.Error(); msg != "" {
+					os.Stderr.WriteString("gitia: " + msg + "\n")
+				}
 				if strings.HasPrefix(err.Error(), "unknown command ") {
 					err = exitcode.Wrap(exitcode.Usage, err)
 				}

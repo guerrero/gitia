@@ -60,6 +60,14 @@ func newCommitCmd() *cobra.Command {
 }
 
 func runCommit(ctx context.Context, stdout, stderr io.Writer, o commitOptions) error {
+	// The commit feedback marks are colored only on a real terminal; piped
+	// output carries the plain symbols.
+	check, cross := "✓", "✗"
+	if ui.IsTerminalWriter(stdout) {
+		check = ansiGreen + check + ansiReset
+		cross = ansiRed + cross + ansiReset
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -179,6 +187,12 @@ func runCommit(ctx context.Context, stdout, stderr io.Writer, o commitOptions) e
 
 	var previous *commit.Message
 	for reroll := 0; ; reroll++ {
+		// The spinner is a progress cue on a terminal; in --verbose the model's
+		// raw output is interleaved with stderr, so an animated \r would corrupt it.
+		var spin *ui.Spinner
+		if !o.verbose {
+			spin = ui.StartSpinner(stderr, "Processing...")
+		}
 		msg, err := generateOnce(ctx, stderr, client, generateArgs{
 			model:       model,
 			system:      system,
@@ -190,6 +204,9 @@ func runCommit(ctx context.Context, stdout, stderr io.Writer, o commitOptions) e
 			previous:    previous,
 			verbose:     o.verbose,
 		})
+		if spin != nil {
+			spin.Stop()
+		}
 		if err != nil {
 			return err
 		}
@@ -221,7 +238,11 @@ func runCommit(ctx context.Context, stdout, stderr io.Writer, o commitOptions) e
 
 		// 13. Non-interactive.
 		if !interactive {
-			return git.Commit(ctx, repoRoot, rendered, resolved.Rules.SignOff)
+			if err := git.Commit(ctx, repoRoot, rendered, resolved.Rules.SignOff); err != nil {
+				return err
+			}
+			fmt.Fprintln(stdout, check, "committed")
+			return nil
 		}
 
 		// 14. The menu.
@@ -233,22 +254,31 @@ func runCommit(ctx context.Context, stdout, stderr io.Writer, o commitOptions) e
 
 		switch choice {
 		case ui.ChoiceCommit:
-			return git.Commit(ctx, repoRoot, rendered, resolved.Rules.SignOff)
+			if err := git.Commit(ctx, repoRoot, rendered, resolved.Rules.SignOff); err != nil {
+				return err
+			}
+			fmt.Fprintln(stdout, check, "committed")
+			return nil
 		case ui.ChoiceEdit:
-			edited, err := ui.EditMessage(ctx, rendered)
+			edited, err := ui.EditMessage(ctx, rendered, cfg.Commit.Editor)
 			if err != nil {
 				return err
 			}
 			if err := rules.CommitlintEdit(ctx, repoRoot, runner, edited+"\n"); err != nil {
 				return err
 			}
-			return git.Commit(ctx, repoRoot, edited+"\n", resolved.Rules.SignOff)
+			if err := git.Commit(ctx, repoRoot, edited+"\n", resolved.Rules.SignOff); err != nil {
+				return err
+			}
+			fmt.Fprintln(stdout, check, "committed")
+			return nil
 		case ui.ChoiceRegenerate:
 			cp := msg
 			previous = &cp
 			continue
 		case ui.ChoiceQuit:
-			return exitcode.Wrapf(exitcode.Aborted, "aborted")
+			fmt.Fprintln(stdout, cross, "Aborted")
+			return exitcode.Wrapf(exitcode.Aborted, "")
 		}
 	}
 }

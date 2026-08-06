@@ -30,7 +30,9 @@ func main() {
 	})
 
 	if err := root.ExecuteContext(ctx); err != nil {
-		fmt.Fprintln(os.Stderr, "gitia:", err)
+		if msg := err.Error(); msg != "" {
+			fmt.Fprintln(os.Stderr, "gitia:", msg)
+		}
 		os.Exit(exitcode.Of(usageExit(err)))
 	}
 }

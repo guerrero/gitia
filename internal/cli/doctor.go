@@ -15,6 +15,7 @@ import (
 	"github.com/guerrero/gitia/internal/git"
 	"github.com/guerrero/gitia/internal/ollama"
 	"github.com/guerrero/gitia/internal/rules"
+	"github.com/guerrero/gitia/internal/ui"
 )
 
 // CheckStatus is the outcome of one doctor check.
@@ -75,16 +76,38 @@ func newDoctorCmd() *cobra.Command {
 	return cmd
 }
 
+// printReport renders the checks one per line. On a real terminal the status is
+// colored green/yellow/red; the JSON form is the machine-readable source of
+// truth and carries no color.
 func printReport(w io.Writer, r Report) {
-	symbols := map[CheckStatus]string{
-		StatusPass: "ok  ",
-		StatusWarn: "warn",
+	labels := map[CheckStatus]string{
+		StatusPass: "OK",
+		StatusWarn: "WARN",
 		StatusFail: "FAIL",
 	}
+	colors := map[CheckStatus]string{
+		StatusPass: ansiGreen,
+		StatusWarn: ansiYellow,
+		StatusFail: ansiRed,
+	}
+	colored := ui.IsTerminalWriter(w)
 	for _, c := range r.Checks {
-		fmt.Fprintf(w, "%s  %-16s %s\n", symbols[c.Status], c.Name, c.Detail)
+		label := labels[c.Status]
+		if !colored {
+			fmt.Fprintf(w, "%-4s  %-16s %s\n", label, c.Name, c.Detail)
+			continue
+		}
+		fmt.Fprintf(w, "%s%-4s%s  %-16s %s\n", colors[c.Status], label, ansiReset, c.Name, c.Detail)
 	}
 }
+
+// ANSI SGR codes for the doctor status labels.
+const (
+	ansiReset  = "\x1b[0m"
+	ansiGreen  = "\x1b[32m"
+	ansiYellow = "\x1b[33m"
+	ansiRed    = "\x1b[31m"
+)
 
 // RunChecks executes the ten diagnostics in order. Checks 6-10 can only pass or
 // warn: gitia works without Node, commitlint, a config file, an editor, or any
@@ -200,13 +223,15 @@ func RunChecks(ctx context.Context, dir string) Report {
 		add("config", StatusPass, "%s", cfgPath)
 	}
 
-	// 9. An editor. Warning only: [e] is optional.
-	if e := os.Getenv("EDITOR"); e != "" {
-		add("editor", StatusPass, "EDITOR=%s", e)
-	} else if v := os.Getenv("VISUAL"); v != "" {
-		add("editor", StatusPass, "VISUAL=%s", v)
-	} else {
-		add("editor", StatusWarn, "neither EDITOR nor VISUAL is set; [e] will use vi")
+	// 9. An editor. Warning only: [e] is optional, and the resolution always
+	// falls back to vi.
+	switch {
+	case cfg.Commit.Editor != "":
+		add("editor", StatusPass, "editor=%s", cfg.Commit.Editor)
+	case os.Getenv("EDITOR") != "":
+		add("editor", StatusPass, "EDITOR=%s", os.Getenv("EDITOR"))
+	default:
+		add("editor", StatusWarn, "EDITOR is not set; [e] will use vi")
 	}
 
 	// 10. Convention files. Warning only.

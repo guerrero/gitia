@@ -1,4 +1,4 @@
-.TH GITIA 1 "2025-01-01" "gitia dev" "User Commands"
+.TH GITIA 1 "2026-08-06" "gitia dev" "User Commands"
 .SH NAME
 gitia \- generate Conventional Commits from the staged diff with a local model
 .SH SYNOPSIS
@@ -85,11 +85,13 @@ Base URL of the Ollama server. Takes precedence over
 .I ollama.host
 in the configuration file.
 .TP
-.B EDITOR ", " VISUAL
+.B EDITOR
 The editor opened by the
 .B [e]
 choice at the confirmation prompt.
-.BR EDITOR " is tried first, then " VISUAL ", then " vi .
+.I commit.editor
+in the configuration file is tried first, then
+.BR EDITOR ", then " vi .
 .SH FILES
 .TP
 .I ~/.config/gitia/config.toml

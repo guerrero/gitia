@@ -43,6 +43,7 @@ type CommitConfig struct {
 	Body              bool     `toml:"body"`
 	SignOff           bool     `toml:"sign_off"`
 	Language          string   `toml:"language"`
+	Editor            string   `toml:"editor"`
 }
 
 type CommitlintConfig struct {

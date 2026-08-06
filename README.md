@@ -79,6 +79,7 @@ body_max_line_length = 100
 body      = true
 sign_off  = false
 language  = "en"
+editor    = ""              # defaults to $EDITOR, then vi
 
 [commitlint]
 enabled = true
@@ -100,20 +101,21 @@ exclude   = ["*.lock", "package-lock.json", "pnpm-lock.yaml",
 `gitia doctor` checks the ten things that can stop gitia from working:
 
 ```text
-ok    git              git version 2.54.0
-ok    repository       /Users/alex/conductor/workspaces/gitia/montreal
+OK    git              git version 2.54.0
+OK    repository       /Users/alex/conductor/workspaces/gitia/montreal
 FAIL  ollama binary    ollama not found on PATH; install it with: brew install ollama
-ok    ollama server    http://localhost:11434 (1 models)
+OK    ollama server    http://localhost:11434 (1 models)
 FAIL  model            gemma4:e2b-it-qat not present; run: ollama pull gemma4:e2b-it-qat
-warn  node             /Users/alex/.local/share/pnpm/node found, but no package manager lockfile in this repository
-warn  commitlint       no commitlint config in this repository
-warn  config           /Users/alex/.config/gitia/config.toml not present; using defaults
-warn  editor           neither EDITOR nor VISUAL is set; [e] will use vi
-ok    conventions      [AGENTS.md]
+WARN  node             /Users/alex/.local/share/pnpm/node found, but no package manager lockfile in this repository
+WARN  commitlint       no commitlint config in this repository
+WARN  config           /Users/alex/.config/gitia/config.toml not present; using defaults
+WARN  editor           EDITOR is not set; [e] will use vi
+OK    conventions      [AGENTS.md]
 gitia: one or more checks failed
 ```
 
-A `--json` mode prints the same checks machine-readably.
+A `--json` mode prints the same checks machine-readably. On a terminal the
+`OK`/`WARN`/`FAIL` labels are colored green/yellow/red.
 
 ## Exit codes
 

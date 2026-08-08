@@ -39,6 +39,9 @@ func TestDefaultConfig(t *testing.T) {
 	if !cfg.Commit.Body {
 		t.Error("Commit.Body = false, want true")
 	}
+	if got := cfg.Commit.HeaderIdealLength; len(got) != 2 || got[0] != 50 || got[1] != 55 {
+		t.Errorf("Commit.HeaderIdealLength = %v, want [50 55]", got)
+	}
 	if !cfg.Commitlint.Enabled || cfg.Commitlint.Runner != "auto" {
 		t.Errorf("Commitlint = %+v, want enabled with runner auto", cfg.Commitlint)
 	}
@@ -96,6 +99,19 @@ header_max_length = 50
 	}
 }
 
+func TestLoadConfigParsesHeaderIdealLength(t *testing.T) {
+	path := writeConfig(t, "[commit]\nheader_ideal_length = [50, 55]\n")
+
+	cfg, _, err := rules.LoadConfigAt(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cfg.Commit.HeaderIdealLength) != 2 ||
+		cfg.Commit.HeaderIdealLength[0] != 50 || cfg.Commit.HeaderIdealLength[1] != 55 {
+		t.Errorf("Commit.HeaderIdealLength = %v, want [50 55]", cfg.Commit.HeaderIdealLength)
+	}
+}
+
 func TestLoadConfigHonorsExplicitFalse(t *testing.T) {
 	path := writeConfig(t, "[commit]\nbody = false\n\n[commitlint]\nenabled = false\n")
 
@@ -123,6 +139,7 @@ func TestConfigApply(t *testing.T) {
 	cfg.Commit.Types = []string{"feat", "fix"}
 	cfg.Commit.HeaderMaxLength = 50
 	cfg.Commit.BodyMaxLineLength = 72
+	cfg.Commit.HeaderIdealLength = []int{40, 60}
 	cfg.Commit.Body = false
 	cfg.Commit.SignOff = true
 	cfg.Commit.Language = "es"
@@ -137,6 +154,9 @@ func TestConfigApply(t *testing.T) {
 	}
 	if rs.BodyMaxLineLength != 72 {
 		t.Errorf("BodyMaxLineLength = %d, want 72", rs.BodyMaxLineLength)
+	}
+	if rs.HeaderIdealMin != 40 || rs.HeaderIdealMax != 60 {
+		t.Errorf("HeaderIdeal = [%d %d], want [40 60]", rs.HeaderIdealMin, rs.HeaderIdealMax)
 	}
 	if rs.IncludeBody {
 		t.Error("IncludeBody = true, want false")
@@ -156,6 +176,39 @@ func TestConfigApplyEmptyTypesKeepsTheBaseline(t *testing.T) {
 	rs := cfg.Apply(rules.Conventional())
 	if len(rs.Types) != len(rules.Conventional().Types) {
 		t.Errorf("Types = %v; an empty commit.types must leave the baseline intact", rs.Types)
+	}
+}
+
+func TestConfigApplyHeaderIdealLengthOverlay(t *testing.T) {
+	base := rules.Conventional()
+
+	// An empty or 1-element slice means "not configured": baseline stays.
+	for _, v := range [][]int{nil, {}, {55}} {
+		cfg := rules.DefaultConfig()
+		cfg.Commit.HeaderIdealLength = v
+		rs := cfg.Apply(base)
+		if rs.HeaderIdealMin != 50 || rs.HeaderIdealMax != 55 {
+			t.Errorf("HeaderIdealLength = %v must keep the baseline, got [%d %d]",
+				v, rs.HeaderIdealMin, rs.HeaderIdealMax)
+		}
+	}
+
+	// [0, 0] explicitly disables the guidance.
+	cfg := rules.DefaultConfig()
+	cfg.Commit.HeaderIdealLength = []int{0, 0}
+	rs := cfg.Apply(base)
+	if rs.HeaderIdealMin != 0 || rs.HeaderIdealMax != 0 {
+		t.Errorf("HeaderIdealLength = [0 0] must disable the guidance, got [%d %d]",
+			rs.HeaderIdealMin, rs.HeaderIdealMax)
+	}
+
+	// Extras beyond the first two are ignored.
+	cfg = rules.DefaultConfig()
+	cfg.Commit.HeaderIdealLength = []int{70, 80, 90}
+	rs = cfg.Apply(base)
+	if rs.HeaderIdealMin != 70 || rs.HeaderIdealMax != 80 {
+		t.Errorf("HeaderIdealLength = [70 80 90] must use the first two, got [%d %d]",
+			rs.HeaderIdealMin, rs.HeaderIdealMax)
 	}
 }
 

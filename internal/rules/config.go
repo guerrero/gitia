@@ -42,6 +42,7 @@ type OllamaConfig struct {
 type CommitConfig struct {
 	Types             []string `toml:"types"`
 	HeaderMaxLength   int      `toml:"header_max_length"`
+	HeaderIdealLength []int    `toml:"header_ideal_length"`
 	BodyMaxLineLength int      `toml:"body_max_line_length"`
 	Body              bool     `toml:"body"`
 	SignOff           bool     `toml:"sign_off"`
@@ -88,6 +89,7 @@ func DefaultConfig() Config {
 		Commit: CommitConfig{
 			Types:             base.Types,
 			HeaderMaxLength:   base.HeaderMaxLength,
+			HeaderIdealLength: []int{base.HeaderIdealMin, base.HeaderIdealMax},
 			BodyMaxLineLength: base.BodyMaxLineLength,
 			Body:              true,
 			SignOff:           false,
@@ -170,6 +172,10 @@ func (c Config) Apply(rs RuleSet) RuleSet {
 	}
 	if c.Commit.HeaderMaxLength > 0 {
 		out.HeaderMaxLength = c.Commit.HeaderMaxLength
+	}
+	if len(c.Commit.HeaderIdealLength) >= 2 {
+		out.HeaderIdealMin = c.Commit.HeaderIdealLength[0]
+		out.HeaderIdealMax = c.Commit.HeaderIdealLength[1]
 	}
 	if c.Commit.BodyMaxLineLength > 0 {
 		out.BodyMaxLineLength = c.Commit.BodyMaxLineLength

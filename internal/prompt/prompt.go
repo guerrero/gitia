@@ -34,6 +34,16 @@ func System(rs rules.RuleSet, docs []rules.AgentDoc) string {
 	if rs.HeaderMaxLength > 0 {
 		fmt.Fprintf(&b, "- The whole \"type(scope): subject\" line must be at most %d characters.\n", rs.HeaderMaxLength)
 	}
+	if rs.HeaderIdealMin > 0 && rs.HeaderIdealMax > 0 && rs.HeaderIdealMin <= rs.HeaderIdealMax {
+		max := rs.HeaderIdealMax
+		if rs.HeaderMaxLength > 0 && max > rs.HeaderMaxLength {
+			max = rs.HeaderMaxLength
+		}
+		if rs.HeaderIdealMin <= max {
+			fmt.Fprintf(&b, "- Prefer a header of %d–%d characters; the limit above is a ceiling, not a target.\n",
+				rs.HeaderIdealMin, max)
+		}
+	}
 	b.WriteString("- Write the subject in the imperative mood: \"add\", not \"added\" or \"adds\".\n")
 	b.WriteString("- The subject names the intent of the change — what it accomplishes for a user of the code — not the mechanics of the diff. Prefer \"disable telemetry\" over \"update settings\".")
 	b.WriteString("\n")

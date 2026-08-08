@@ -27,6 +27,56 @@ func TestSystemStatesTheRules(t *testing.T) {
 	}
 }
 
+func TestSystemGuidesTowardTheIdealHeaderWidth(t *testing.T) {
+	got := prompt.System(rules.Conventional(), nil)
+
+	want := "- Prefer a header of 50–55 characters; the limit above is a ceiling, not a target."
+	if !strings.Contains(got, want) {
+		t.Errorf("System() is missing the ideal-width guidance\n%s", got)
+	}
+}
+
+func TestSystemOmitsIdealHeaderWidthWhenDisabled(t *testing.T) {
+	rs := rules.Conventional()
+	rs.HeaderIdealMin = 0
+	rs.HeaderIdealMax = 0
+
+	got := prompt.System(rs, nil)
+	if strings.Contains(got, "Prefer a header") {
+		t.Errorf("System() must not emit the guidance when the range is disabled\n%s", got)
+	}
+}
+
+func TestSystemOmitsInvertedIdealRange(t *testing.T) {
+	rs := rules.Conventional()
+	rs.HeaderIdealMin = 60
+	rs.HeaderIdealMax = 50
+
+	got := prompt.System(rs, nil)
+	if strings.Contains(got, "Prefer a header") {
+		t.Errorf("System() must not emit an inverted range\n%s", got)
+	}
+}
+
+func TestSystemClampsIdealRangeToTheHardLimit(t *testing.T) {
+	rs := rules.Conventional()
+	rs.HeaderIdealMax = 80
+
+	got := prompt.System(rs, nil)
+	if !strings.Contains(got, "Prefer a header of 50–72 characters") {
+		t.Errorf("System() must clamp the ideal max to the hard limit\n%s", got)
+	}
+
+	rs = rules.Conventional()
+	rs.HeaderIdealMin = 80
+	rs.HeaderIdealMax = 90
+
+	got = prompt.System(rs, nil)
+	if strings.Contains(got, "Prefer a header") {
+		t.Errorf("System() must omit a range clamped past the hard limit\n%s", got)
+	}
+}
+
 func TestSystemOrdersAgentDocsLeastAuthoritativeFirst(t *testing.T) {
 	docs := []rules.AgentDoc{
 		{Path: "CLAUDE.md", Content: "claude says alpha"},

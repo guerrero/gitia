@@ -35,13 +35,13 @@ func System(rs rules.RuleSet, docs []rules.AgentDoc) string {
 		fmt.Fprintf(&b, "- The whole \"type(scope): subject\" line must be at most %d characters.\n", rs.HeaderMaxLength)
 	}
 	if rs.HeaderIdealMin > 0 && rs.HeaderIdealMax > 0 && rs.HeaderIdealMin <= rs.HeaderIdealMax {
-		max := rs.HeaderIdealMax
-		if rs.HeaderMaxLength > 0 && max > rs.HeaderMaxLength {
-			max = rs.HeaderMaxLength
+		idealMax := rs.HeaderIdealMax
+		if rs.HeaderMaxLength > 0 && idealMax > rs.HeaderMaxLength {
+			idealMax = rs.HeaderMaxLength
 		}
-		if rs.HeaderIdealMin <= max {
+		if rs.HeaderIdealMin <= idealMax {
 			fmt.Fprintf(&b, "- Prefer a header of %d–%d characters; the limit above is a ceiling, not a target.\n",
-				rs.HeaderIdealMin, max)
+				rs.HeaderIdealMin, idealMax)
 		}
 	}
 	b.WriteString("- Write the subject in the imperative mood: \"add\", not \"added\" or \"adds\".\n")

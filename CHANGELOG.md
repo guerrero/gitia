@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `commit.header_ideal_length` configures the soft 50–55 character header
+  target the prompt suggests; it is guidance only, never enforced.
+
+### Changed
+
+- The default body line width is now 72 characters (was 100), matching the
+  header limit. Both remain configurable.
+
 ## [0.2.0] - 2026-08-06
 
 ### Added

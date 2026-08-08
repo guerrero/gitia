@@ -17,7 +17,7 @@ commit messages, so it is dogfooded on every commit here.
 ## Commit conventions
 
 Conventional Commits v1.0.0. The subject is imperative, lower case, and has no
-trailing period. The header stays within 72 characters.
+trailing period. The header stays within 72 characters and ideally within 50–55.
 
 Scope by package, without the `internal/` prefix: `cli`, `commit`, `git`,
 `ollama`, `prompt`, `rules`, `ui`. Use no scope for changes that span the whole

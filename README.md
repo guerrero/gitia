@@ -75,7 +75,8 @@ timeout = "60s"
 types = ["feat", "fix", "docs", "style", "refactor", "perf",
          "test", "build", "ci", "chore", "revert"]
 header_max_length    = 72   # whole "type(scope): subject" line, as commitlint counts it
-body_max_line_length = 100
+header_ideal_length  = [50, 55]  # soft guidance for the model, never enforced
+body_max_line_length = 72
 body      = true
 sign_off  = false
 language  = "en"

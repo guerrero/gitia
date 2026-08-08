@@ -29,6 +29,13 @@ type RuleSet struct {
 	HeaderMaxLength int
 	// BodyMaxLineLength bounds each rendered body line. Zero disables the check.
 	BodyMaxLineLength int
+	// HeaderIdealMin is the lower bound of the soft header width the model is
+	// asked to aim for. It is prompt guidance only: Validate never enforces
+	// it. Zero disables the guidance.
+	HeaderIdealMin int
+	// HeaderIdealMax is the upper bound of the soft header width. It is never
+	// enforced; zero disables the guidance.
+	HeaderIdealMax int
 
 	TypeCase    Case
 	SubjectCase Case

@@ -13,7 +13,9 @@ func Conventional() RuleSet {
 		Scopes:             nil, // any scope
 		ScopeRequired:      false,
 		HeaderMaxLength:    72,
-		BodyMaxLineLength:  100,
+		BodyMaxLineLength:  72,
+		HeaderIdealMin:     50,
+		HeaderIdealMax:     55,
 		TypeCase:           CaseLower,
 		SubjectCase:        CaseAny,
 		SubjectFullStop:    true,

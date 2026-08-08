@@ -91,7 +91,7 @@ header_max_length = 50
 	if cfg.Commit.HeaderMaxLength != 50 {
 		t.Errorf("Commit.HeaderMaxLength = %d, want 50", cfg.Commit.HeaderMaxLength)
 	}
-	if cfg.Commit.BodyMaxLineLength != 100 {
+	if cfg.Commit.BodyMaxLineLength != 72 {
 		t.Errorf("Commit.BodyMaxLineLength = %d; an absent key must keep its default", cfg.Commit.BodyMaxLineLength)
 	}
 }

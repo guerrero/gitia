@@ -12,8 +12,14 @@ func TestConventionalBaseline(t *testing.T) {
 	if got, want := rs.HeaderMaxLength, 72; got != want {
 		t.Errorf("HeaderMaxLength = %d, want %d", got, want)
 	}
-	if got, want := rs.BodyMaxLineLength, 100; got != want {
+	if got, want := rs.BodyMaxLineLength, 72; got != want {
 		t.Errorf("BodyMaxLineLength = %d, want %d", got, want)
+	}
+	if got, want := rs.HeaderIdealMin, 50; got != want {
+		t.Errorf("HeaderIdealMin = %d, want %d", got, want)
+	}
+	if got, want := rs.HeaderIdealMax, 55; got != want {
+		t.Errorf("HeaderIdealMax = %d, want %d", got, want)
 	}
 	if rs.TypeCase != rules.CaseLower {
 		t.Errorf("TypeCase = %q, want %q", rs.TypeCase, rules.CaseLower)

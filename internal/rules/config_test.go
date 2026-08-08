@@ -39,8 +39,10 @@ func TestDefaultConfig(t *testing.T) {
 	if !cfg.Commit.Body {
 		t.Error("Commit.Body = false, want true")
 	}
-	if got := cfg.Commit.HeaderIdealLength; len(got) != 2 || got[0] != 50 || got[1] != 55 {
-		t.Errorf("Commit.HeaderIdealLength = %v, want [50 55]", got)
+	base := rules.Conventional()
+	want := []int{base.HeaderIdealMin, base.HeaderIdealMax}
+	if got := cfg.Commit.HeaderIdealLength; len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
+		t.Errorf("Commit.HeaderIdealLength = %v, want %v", got, want)
 	}
 	if !cfg.Commitlint.Enabled || cfg.Commitlint.Runner != "auto" {
 		t.Errorf("Commitlint = %+v, want enabled with runner auto", cfg.Commitlint)

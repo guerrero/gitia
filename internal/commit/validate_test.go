@@ -67,7 +67,7 @@ func TestValidateRules(t *testing.T) {
 
 func TestValidateBodyLengthMeasuredAfterWrapping(t *testing.T) {
 	rs := rulesFor(t)
-	// 120 characters of ordinary words wraps cleanly to 100, so this is legal.
+	// 149 characters of ordinary words wrap cleanly under the 72-column body limit, so this is legal.
 	body := strings.TrimSpace(strings.Repeat("word ", 30))
 
 	if got := commit.Validate(commit.Message{

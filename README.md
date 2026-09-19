@@ -23,7 +23,7 @@ go install github.com/guerrero/gitia/cmd/gitia@latest
 ```
 
 gitia needs an Ollama server (`ollama serve`) with the default model
-`gemma4:e2b-it-qat` — or run `gitia doctor` first to see what your machine is
+`lfm2.5:8b` — or run `gitia doctor` first to see what your machine is
 missing.
 
 ## Quickstart
@@ -61,8 +61,8 @@ never an error — every value has a default:
 
 ```toml
 [model]
-name        = "gemma4:e2b-it-qat"
-fallback    = ["gemma4:e2b", "gemma3n:e2b"]
+name        = "lfm2.5:8b"
+fallback    = ["gemma4:e2b-it-qat"]
 temperature = 0.2
 num_ctx     = 8192
 keep_alive  = "5m"
@@ -105,7 +105,7 @@ OK    git              git version 2.54.0
 OK    repository       /Users/alex/conductor/workspaces/gitia/montreal
 FAIL  ollama binary    ollama not found on PATH; install it with: brew install ollama
 OK    ollama server    http://localhost:11434 (1 models)
-FAIL  model            gemma4:e2b-it-qat not present; run: ollama pull gemma4:e2b-it-qat
+FAIL  model            lfm2.5:8b not present; run: ollama pull lfm2.5:8b
 WARN  node             /Users/alex/.local/share/pnpm/node found, but no package manager lockfile in this repository
 WARN  commitlint       no commitlint config in this repository
 WARN  config           /Users/alex/.config/gitia/config.toml not present; using defaults

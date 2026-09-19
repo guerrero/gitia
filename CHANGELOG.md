@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Default model is now `lfm2.5:8b`, with `gemma4:e2b-it-qat` as fallback.
+
 ## [0.2.0] - 2026-08-06
 
 ### Added

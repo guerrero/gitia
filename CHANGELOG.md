@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-09-19
 
 ### Added
 
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Default model is now `lfm2.5:8b`, with `gemma4:e2b-it-qat` as fallback.
 - The default body line width is now 72 characters (was 100), matching the
   header limit. Both remain configurable.
 
@@ -52,5 +53,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - GitHub Actions workflows; releases are manual now.
 
-[Unreleased]: https://github.com/guerrero/gitia/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/guerrero/gitia/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/guerrero/gitia/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/guerrero/gitia/releases/tag/v0.2.0

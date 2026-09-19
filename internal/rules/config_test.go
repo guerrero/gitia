@@ -21,11 +21,11 @@ func writeConfig(t *testing.T, body string) string {
 func TestDefaultConfig(t *testing.T) {
 	cfg := rules.DefaultConfig()
 
-	if cfg.Model.Name != "gemma4:e2b-it-qat" {
-		t.Errorf("Model.Name = %q, want %q", cfg.Model.Name, "gemma4:e2b-it-qat")
+	if cfg.Model.Name != "lfm2.5:8b" {
+		t.Errorf("Model.Name = %q, want %q", cfg.Model.Name, "lfm2.5:8b")
 	}
-	if len(cfg.Model.Fallback) != 2 || cfg.Model.Fallback[0] != "gemma4:e2b" {
-		t.Errorf("Model.Fallback = %v, want [gemma4:e2b gemma3n:e2b]", cfg.Model.Fallback)
+	if len(cfg.Model.Fallback) != 1 || cfg.Model.Fallback[0] != "gemma4:e2b-it-qat" {
+		t.Errorf("Model.Fallback = %v, want [gemma4:e2b-it-qat]", cfg.Model.Fallback)
 	}
 	if cfg.Model.Temperature != 0.2 {
 		t.Errorf("Model.Temperature = %v, want 0.2", cfg.Model.Temperature)

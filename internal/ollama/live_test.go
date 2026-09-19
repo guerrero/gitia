@@ -12,7 +12,7 @@ import (
 	"github.com/guerrero/gitia/internal/ollama"
 )
 
-const liveModel = "gemma4:e2b-it-qat"
+const liveModel = "lfm2.5:8b"
 
 func liveClient(t *testing.T) *ollama.Client {
 	t.Helper()

@@ -76,8 +76,8 @@ func DefaultConfig() Config {
 	base := Conventional()
 	return Config{
 		Model: ModelConfig{
-			Name:        "gemma4:e2b-it-qat",
-			Fallback:    []string{"gemma4:e2b", "gemma3n:e2b"},
+			Name:        "lfm2.5:8b",
+			Fallback:    []string{"gemma4:e2b-it-qat"},
 			Temperature: 0.2,
 			NumCtx:      8192,
 			KeepAlive:   "5m",

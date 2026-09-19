@@ -78,5 +78,6 @@ URL — this keeps `brew audit` green. It authenticates with the
 `HOMEBREW_TAP_TOKEN` repository secret (write access to both repositories).
 Local fallback: `GITHUB_TOKEN=$(gh auth token) make release` does the same
 from your machine. The token needs `repo` scope (write
-access to both repositories).
+access to both repositories). Do not run the local fallback after a tag push
+that already triggered the workflow.
 6. Verify: `brew update && brew upgrade gitia` installs the new version.

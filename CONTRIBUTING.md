@@ -51,9 +51,11 @@ See `AGENTS.md`. Use gitia itself.
 
 ## Releasing
 
-Releases are manual and documented here; there is no CI. A release publishes
-binary assets to a GitHub Release and updates the Homebrew formula in
-`guerrero/homebrew-tap` automatically via goreleaser.
+Releases are tag-driven via `.github/workflows/release.yml`. Pushing a
+`vX.Y.Z` tag builds the darwin/linux archives with goreleaser, creates the
+GitHub Release, and updates the Homebrew formula in
+`guerrero/homebrew-tap` (plus the `version`-line cleanup). No local release
+step is needed; `make release` remains as a manual fallback.
 
 Versioning follows Semantic Versioning. Until 1.0: `feat` bumps the minor
 version, `fix` bumps the patch version, breaking changes bump the minor
@@ -66,11 +68,15 @@ Checklist:
    and update the compare links at the bottom.
 3. Commit (use gitia itself) and push: `git push origin main`.
 4. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-5. `GITHUB_TOKEN=$(gh auth token) make release` — goreleaser builds the
-   darwin/linux archives, creates the GitHub Release with notes from the
-   commits since the last tag, and pushes `gitia.rb` (at the tap root) to
-   `guerrero/homebrew-tap`. `make release` then strips the redundant
-   `version` line goreleaser emits, since brew derives the version from the
-   URL — this keeps `brew audit` green. The token needs `repo` scope (write
-   access to both repositories).
+5. Push the tag: `git push origin vX.Y.Z` — the `release` workflow takes over:
+goreleaser builds the
+darwin/linux archives, creates the GitHub Release with notes from the
+commits since the last tag, and pushes `gitia.rb` (at the tap root) to
+`guerrero/homebrew-tap`. The workflow then strips the redundant
+`version` line goreleaser emits, since brew derives the version from the
+URL — this keeps `brew audit` green. It authenticates with the
+`HOMEBREW_TAP_TOKEN` repository secret (write access to both repositories).
+Local fallback: `GITHUB_TOKEN=$(gh auth token) make release` does the same
+from your machine. The token needs `repo` scope (write
+access to both repositories).
 6. Verify: `brew update && brew upgrade gitia` installs the new version.

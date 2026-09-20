@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
-      - name: Strip redundant version line from tap formula
+      - name: Publish formula to the tap
         run: ./scripts/clean-tap-formula
         env:
           GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

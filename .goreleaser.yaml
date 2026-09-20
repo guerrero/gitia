@@ -48,6 +48,10 @@ changelog:
 
 brews:
   - name: gitia
+    # Pushed by scripts/clean-tap-formula after stripping the redundant
+    # `version` line (brew derives the version from the URL), so the tap only
+    # ever sees audit-clean commits.
+    skip_upload: true
     repository:
       owner: guerrero
       name: homebrew-tap

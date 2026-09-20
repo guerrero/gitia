@@ -1,12 +1,26 @@
 #!/usr/bin/env bash
-# Strip the redundant `version "..."` line from the tap formula after a
-# release. goreleaser emits it unconditionally, but brew derives the version
-# from the URL, so `brew audit` fails on it. Run from `make release` right
-# after goreleaser; requires GITHUB_TOKEN with write access to the tap.
+# Publish the goreleaser-generated formula to the tap.
+#
+# goreleaser writes dist/homebrew/gitia.rb and, with `skip_upload`, leaves it
+# there instead of pushing it. We push it ourselves for two reasons: brew
+# derives the version from the download URL, so the `version "..."` line
+# goreleaser always emits makes `brew audit` fail; and pushing it here means
+# the tap sees a single audit-clean commit per release instead of goreleaser's
+# commit followed by a cleanup commit that briefly fails tap CI.
+#
+# Run from `make release` or the release workflow right after goreleaser;
+# requires GITHUB_TOKEN with write access to the tap.
 set -euo pipefail
 
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+formula="$repo_root/dist/homebrew/gitia.rb"
 tap_url="https://github.com/guerrero/homebrew-tap.git"
 push_url="https://x-access-token:${GITHUB_TOKEN:-}@github.com/guerrero/homebrew-tap.git"
+
+if [ ! -f "$formula" ]; then
+	echo "error: $formula not found; run goreleaser first" >&2
+	exit 1
+fi
 
 tmp_dir=$(mktemp -d)
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -14,23 +28,25 @@ trap 'rm -rf "$tmp_dir"' EXIT
 git clone --quiet "$tap_url" "$tmp_dir/tap"
 cd "$tmp_dir/tap"
 
-if ! grep -q '^  version "' gitia.rb; then
-	echo "formula already clean"
+perl -ne 'print unless /^  version "/' "$formula" > gitia.rb
+
+if git diff --quiet; then
+	echo "formula already up to date"
 	exit 0
 fi
 
 if [ -z "${GITHUB_TOKEN:-}" ]; then
-	echo "error: GITHUB_TOKEN is not set; cannot push the cleanup commit" >&2
+	echo "error: GITHUB_TOKEN is not set; cannot push the formula" >&2
 	exit 1
 fi
 
-perl -ni -e 'print unless /^  version "/' gitia.rb
+tag=$(grep -m1 -oE '/download/v[^/]+/' gitia.rb | sed -E 's#/download/##; s#/##')
 
 git add gitia.rb
 
 git -c user.name="goreleaserbot" -c user.email="bot@goreleaser.com" \
 	-c commit.gpgsign=false commit --quiet \
-	-m "chore: drop redundant version line from gitia formula"
+	-m "Brew formula update for gitia version $tag"
 
 git push --quiet "$push_url" HEAD:main
-echo "stripped version line from gitia.rb ($(git rev-parse --short HEAD))"
+echo "pushed gitia.rb for $tag ($(git rev-parse --short HEAD))"
